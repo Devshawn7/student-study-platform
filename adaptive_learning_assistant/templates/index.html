@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Adaptive Learning Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #0b0f19;
+      --card-bg: rgba(17, 24, 39, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-primary: #f3f4f6;
+      --text-secondary: #9ca3af;
+      
+      /* Glowing color design tokens */
+      --primary: #6366f1; /* Indigo */
+      --primary-glow: rgba(99, 102, 241, 0.15);
+      --accent-green: #10b981; /* Emerald */
+      --accent-green-glow: rgba(16, 185, 129, 0.2);
+      --accent-amber: #f59e0b; /* Amber */
+      --accent-rose: #ef4444; /* Rose */
+      
+      --font-display: 'Outfit', sans-serif;
+      --font-sans: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+        radial-gradient(at 90% 90%, rgba(16, 185, 129, 0.12) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 20px auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-family: var(--font-display);
+      font-size: 2.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      letter-spacing: -0.03em;
+    }
+
+    header p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      font-weight: 400;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      header h1 {
+        font-size: 2.2rem;
+      }
+    }
+
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 35px;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-primary);
+    }
+
+    .card-title span.icon {
+      background: rgba(255, 255, 255, 0.05);
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      font-size: 1.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Form Fields Styling */
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .form-label {
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-label .metric-icon {
+      font-size: 1.1rem;
+    }
+
+    .form-value-badge {
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      color: #a5b4fc;
+      padding: 2px 10px;
+      border-radius: 8px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.9rem;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    /* Slider styling */
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.1);
+      outline: none;
+      transition: background 0.3s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #818cf8;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--primary-glow);
+      transition: all 0.2s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+      background: #6366f1;
+    }
+
+    input[type="number"] {
+      width: 80px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: var(--text-primary);
+      padding: 8px 12px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--primary);
+    }
+
+    input[type="number"]::-webkit-inner-spin-button, 
+    input[type="number"]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+
+    /* Output Section */
+    .output-section {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    .result-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding-top: 15px;
+    }
+
+    /* SVG Circular Gauge */
+    .gauge-wrapper {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin-bottom: 20px;
+    }
+
+    .gauge-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .gauge-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.04);
+      stroke-width: 10;
+    }
+
+    .gauge-fill {
+      fill: none;
+      stroke: url(#gaugeGradient);
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 565.48; /* 2 * PI * 90 */
+      stroke-dashoffset: 565.48;
+      transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .gauge-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .gauge-percentage {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gauge-label {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 5px;
+    }
+
+    /* Cognitive Score Card */
+    .metric-row {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .metric-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .metric-value-label {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1 0%, #3b82f6 100%);
+      border-radius: 9999px;
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Dynamic Recommendation Panel */
+    .rec-panel {
+      border-top: 1px solid var(--card-border);
+      padding-top: 25px;
+      margin-top: 10px;
+      text-align: left;
+    }
+
+    .rec-status {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rec-items {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .rec-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      font-size: 0.9rem;
+      line-height: 1.4;
+      color: var(--text-secondary);
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+
+    .rec-item-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .rec-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    footer {
+      margin-top: 50px;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Invisible SVG for gradient definitions -->
+  <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#818cf8" />
+        <stop offset="100%" stop-color="#34d399" />
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div class="container">
+    <header>
+      <h1>Adaptive Learning Assistant</h1>
+      <p>Analyze performance parameters and predict student learning outcomes instantly.</p>
+    </header>
+
+    <div class="dashboard-grid">
+      <!-- Inputs Section -->
+      <div class="glass-card">
+        <h2 class="card-title">
+          <span class="icon">⚙️</span>
+          Parameters
+        </h2>
+        
+        <form id="predictionForm" method="post" action="/">
+          <!-- Study Hours -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label" for="study_hours">
+                <span class="metric-icon">📚</span> Study Hours
+              </label>
+              <div class="form-value-badge" id="study_hours_badge">{{study_hours}} hrs</div>
+            </div>
+            <div class="slider-container">
+              <input type="range" id="study_hours" name="study_hours" min="0" max="50" step="0.5" value="{{study_hours}}">
+              <input type="number" id="study_hours_num" min="0" max="50" step="0.5" value="{{study_hours}}">
+            </div>
+          </div>
+
+          <!-- Quiz Score -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label" for="quiz">
+                <span class="metric-icon">📝</span> Quiz Score
+              </label>
+              <div class="form-value-badge" id="quiz_badge">{{quiz}}%</div>
+            </div>
+            <div class="slider-container">
+              <input type="range" id="quiz" name="quiz" min="0" max="100" step="1" value="{{quiz}}">
+              <input type="number" id="quiz_num" min="0" max="100" step="1" value="{{quiz}}">
+            </div>
+          </div>
+
+          <!-- Assignment Score -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label" for="assignment">
+                <span class="metric-icon">📖</span> Assignment Score
+              </label>
+              <div class="form-value-badge" id="assignment_badge">{{assignment}}%</div>
+            </div>
+            <div class="slider-container">
+              <input type="range" id="assignment" name="assignment" min="0" max="100" step="1" value="{{assignment}}">
+              <input type="number" id="assignment_num" min="0" max="100" step="1" value="{{assignment}}">
+            </div>
+          </div>
+
+          <!-- Attendance -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label" for="attendance">
+                <span class="metric-icon">📅</span> Attendance Rate
+              </label>
+              <div class="form-value-badge" id="attendance_badge">{{attendance}}%</div>
+            </div>
+            <div class="slider-container">
+              <input type="range" id="attendance" name="attendance" min="0" max="100" step="1" value="{{attendance}}">
+              <input type="number" id="attendance_num" min="0" max="100" step="1" value="{{attendance}}">
+            </div>
+          </div>
+
+          <!-- Previous GPA -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label" for="gpa">
+                <span class="metric-icon">📈</span> Previous GPA
+              </label>
+              <div class="form-value-badge" id="gpa_badge">{{gpa}}</div>
+            </div>
+            <div class="slider-container">
+              <input type="range" id="gpa" name="gpa" min="0.0" max="4.0" step="0.1" value="{{gpa}}">
+              <input type="number" id="gpa_num" min="0.0" max="4.0" step="0.1" value="{{gpa}}">
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Outputs Section -->
+      <div class="glass-card output-section">
+        <h2 class="card-title">
+          <span class="icon">📊</span>
+          Analysis Output
+        </h2>
+
+        <div class="result-card">
+          <!-- Circular Score Ring -->
+          <div class="gauge-wrapper">
+            <svg class="gauge-svg" viewBox="0 0 200 200">
+              <circle class="gauge-bg" cx="100" cy="100" r="90"></circle>
+              <!-- 2 * PI * r (r=90) = 565.48 -->
+              <circle class="gauge-fill" id="gaugeProgressCircle" cx="100" cy="100" r="90"></circle>
+            </svg>
+            <div class="gauge-text">
+              <span class="gauge-percentage" id="scorePercent">0.0</span>
+              <span class="gauge-label">Final Score</span>
+            </div>
+          </div>
+
+          <!-- Cognitive Index Progress -->
+          <div class="metric-row">
+            <div class="metric-meta">
+              <span>Cognitive Index</span>
+              <span class="metric-value-label" id="cognitiveIndex">0</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" id="cognitiveProgressBarFill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommendations Panel -->
+        <div class="rec-panel">
+          <div class="rec-status" id="recStatusHeader">
+            <span>Status Assessment</span>
+          </div>
+          <div class="rec-items" id="recItemsList">
+            <!-- Dynamic feedback will be populated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>&copy; 2026 Adaptive Learning Assistant. Revamped for high efficiency and design excellence.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Elements references
+    const elements = {
+      study_hours: document.getElementById('study_hours'),
+      study_hours_num: document.getElementById('study_hours_num'),
+      study_hours_badge: document.getElementById('study_hours_badge'),
+      
+      quiz: document.getElementById('quiz'),
+      quiz_num: document.getElementById('quiz_num'),
+      quiz_badge: document.getElementById('quiz_badge'),
+      
+      assignment: document.getElementById('assignment'),
+      assignment_num: document.getElementById('assignment_num'),
+      assignment_badge: document.getElementById('assignment_badge'),
+      
+      attendance: document.getElementById('attendance'),
+      attendance_num: document.getElementById('attendance_num'),
+      attendance_badge: document.getElementById('attendance_badge'),
+      
+      gpa: document.getElementById('gpa'),
+      gpa_num: document.getElementById('gpa_num'),
+      gpa_badge: document.getElementById('gpa_badge'),
+
+      gaugeFill: document.getElementById('gaugeProgressCircle'),
+      scoreText: document.getElementById('scorePercent'),
+      cognitiveIndex: document.getElementById('cognitiveIndex'),
+      cognitiveFill: document.getElementById('cognitiveProgressBarFill'),
+      
+      recStatusHeader: document.getElementById('recStatusHeader'),
+      recItemsList: document.getElementById('recItemsList')
+    };
+
+    // Keep range sliders and numerical fields synchronized
+    function syncValues(slider, num, suffix = '', divisor = 1) {
+      const updateBadgesAndOutputs = () => {
+        const val = parseFloat(slider.value);
+        num.value = val;
+        
+        // Update badge text
+        const badgeId = slider.id + '_badge';
+        const badge = document.getElementById(badgeId);
+        if (badge) {
+          badge.textContent = val + suffix;
+        }
+        
+        calculatePredictions();
+      };
+
+      slider.addEventListener('input', () => {
+        updateBadgesAndOutputs();
+      });
+
+      num.addEventListener('input', () => {
+        let val = parseFloat(num.value);
+        if (isNaN(val)) val = parseFloat(slider.min);
+        // Constrain numerical bounds
+        val = Math.max(parseFloat(slider.min), Math.min(parseFloat(slider.max), val));
+        slider.value = val;
+        
+        const badgeId = slider.id + '_badge';
+        const badge = document.getElementById(badgeId);
+        if (badge) {
+          badge.textContent = val + suffix;
+        }
+        
+        calculatePredictions();
+      });
+    }
+
+    // Bind sync functions
+    syncValues(elements.study_hours, elements.study_hours_num, ' hrs');
+    syncValues(elements.quiz, elements.quiz_num, '%');
+    syncValues(elements.assignment, elements.assignment_num, '%');
+    syncValues(elements.attendance, elements.attendance_num, '%');
+    syncValues(elements.gpa, elements.gpa_num, '');
+
+    // Set SVG gauge offset
+    function setGaugePercentage(percent) {
+      const circleLength = 565.48; // 2 * PI * r (r=90)
+      const offset = circleLength - (percent / 100) * circleLength;
+      elements.gaugeFill.style.strokeDashoffset = offset;
+      elements.scoreText.textContent = percent.toFixed(1);
+    }
+
+    // Generate dynamic feedback report based on calculated outputs and inputs
+    function updateRecommendations(predictedScore, cognitiveScore) {
+      const study = parseFloat(elements.study_hours.value);
+      const quiz = parseFloat(elements.quiz.value);
+      const assignment = parseFloat(elements.assignment.value);
+      const attendance = parseFloat(elements.attendance.value);
+      const gpa = parseFloat(elements.gpa.value);
+
+      // 1. Status header and primary recommendation
+      let statusHtml = '';
+      if (predictedScore >= 85) {
+        statusHtml = '<span style="color: var(--accent-green);">🟢 Exceptional Standing</span>';
+      } else if (predictedScore >= 70) {
+        statusHtml = '<span style="color: var(--accent-amber);">🟡 Strong Standing</span>';
+      } else {
+        statusHtml = '<span style="color: var(--accent-rose);">🔴 Attention Required</span>';
+      }
+      elements.recStatusHeader.innerHTML = '<h4>Assessment Status: ' + statusHtml + '</h4>';
+
+      // 2. Clear items
+      elements.recItemsList.innerHTML = '';
+      const recommendations = [];
+
+      // Logic check for study hours
+      if (study < 8) {
+        recommendations.push({
+          icon: '📚',
+          title: 'Increase Study Time',
+          desc: `Set a target of at least 10-12 hours per week. Currently at ${study} hours.`
+        });
+      }
+
+      // Logic check for attendance
+      if (attendance < 85) {
+        recommendations.push({
+          icon: '📅',
+          title: 'Boost Attendance Rate',
+          desc: `Attendance is critical. Maintaining attendance above 85% is strongly linked to higher final scores.`
+        });
+      }
+
+      // Logic check for quizzes
+      if (quiz < 75) {
+        recommendations.push({
+          icon: '📝',
+          title: 'Quiz Conceptual Prep',
+          desc: `Average quiz score is ${quiz}%. Review foundational readings and attempt practice sets before tests.`
+        });
+      }
+
+      // Logic check for assignments
+      if (assignment < 80) {
+        recommendations.push({
+          icon: '📖',
+          title: 'Assignment Quality Check',
+          desc: `Ensure submissions fully meet grading criteria. Consider peer-reviewing work before turning it in.`
+        });
+      }
+
+      // Logic check for GPA
+      if (gpa < 2.5) {
+        recommendations.push({
+          icon: '📈',
+          title: 'Academic Counseling',
+          desc: `A prior GPA of ${gpa} indicates underlying concept gaps. Schedule time with a mentor or TA.`
+        });
+      }
+
+      // Fallback if score is high and everything is fine
+      if (recommendations.length === 0) {
+        recommendations.push({
+          icon: '🌟',
+          title: 'Excellent Academic Balance',
+          desc: 'All performance indicators meet or exceed target metrics. Continue maintaining this standard.'
+        });
+      }
+
+      // Render recommendations
+      recommendations.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'rec-item';
+        itemDiv.style.animationDelay = (index * 0.05) + 's';
+        itemDiv.innerHTML = `
+          <span class="rec-icon">${item.icon}</span>
+          <div>
+            <div class="rec-item-title">${item.title}</div>
+            <div>${item.desc}</div>
+          </div>
+        `;
+        elements.recItemsList.appendChild(itemDiv);
+      });
+    }
+
+    // Call API server endpoint to calculate prediction
+    let fetchAbortController = null;
+    function calculatePredictions() {
+      // Abort previous in-flight request if user is dragging fast
+      if (fetchAbortController) {
+        fetchAbortController.abort();
+      }
+      fetchAbortController = new AbortController();
+
+      const payload = {
+        study_hours: parseFloat(elements.study_hours.value),
+        quiz: parseFloat(elements.quiz.value),
+        assignment: parseFloat(elements.assignment.value),
+        attendance: parseFloat(elements.attendance.value),
+        gpa: parseFloat(elements.gpa.value)
+      };
+
+      fetch('/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload),
+        signal: fetchAbortController.signal
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          // Update visualization metrics
+          setGaugePercentage(data.result);
+          elements.cognitiveIndex.textContent = data.cognitive;
+          elements.cognitiveFill.style.width = data.cognitive + '%';
+          
+          // Generate recommendations on client-side dynamically
+          updateRecommendations(data.result, data.cognitive);
+        }
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Prediction calculation failed:', err);
+        }
+      });
+    }
+
+    // Initialize display with default calculations
+    document.addEventListener('DOMContentLoaded', () => {
+      calculatePredictions();
+    });
+  </script>
+</body>
+</html>
